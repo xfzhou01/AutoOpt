@@ -1,0 +1,9 @@
+build/
+test/
+.vscode/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+RTLAutoOpt/test
+RTLAutoOpt/.vscode
