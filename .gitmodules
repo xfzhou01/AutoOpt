@@ -1,6 +1,6 @@
 [submodule "lib/mockturtle"]
 	path = lib/mockturtle
 	url = https://github.com/zfchu/mockturtle
-[submodule "RTLAutoOpt/harm"]
-	path = RTLAutoOpt/harm
+[submodule "RTLAutoOpt/harm/harm"]
+	path = RTLAutoOpt/harm/harm
 	url = https://github.com/SamueleGerminiani/harm
