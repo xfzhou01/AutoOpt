@@ -1,0 +1,17 @@
+Given: a CNF file in .txt, a aiger file encoded in ascii or binary
+The aiger file contains latches
+
+Output: the optimized aiger file
+
+Optimization process:
+
+for AND gate in the aiger netlist in reverse-topo order:
+    try the modification below:
+        M1. connect the gate's output directly to the gate's input 1
+        M2. connect the gate's output directly to the gate's input 2
+        M3. connect the gate's output to zero
+        M4. connect the gate's output to one
+        M5. connect the gate's output to the reverse of the gate's input 1
+        M6. connect the gate's output to the reverse of the gate's input 2
+    the modification is valid only if it keeps the original functionality of the 
+    aiger netlist under the assumption of cnf
