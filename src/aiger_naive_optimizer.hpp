@@ -2,6 +2,7 @@
 #define __AIGER_NAIVE_OPTIMIZER_HPP__
 #include <vector>
 #include <string>
+#include <set>
 
 #include <mockturtle/mockturtle.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -16,6 +17,8 @@ using namespace mockturtle;
 class aiger_naive_optimizer {
     // this class is used to provide optimization candidates for AIGER networks
 private:
+    // the safe AIGER network after optimization
+    sequential<aig_network, true> aig_network_after_opt;
 
     // the buffer to hold the AIGER network during optimization
     sequential<aig_network, true> aig_network_during_opt;
@@ -37,6 +40,13 @@ public:
     // Getter for the optimized network
     const sequential<aig_network, true>& get_optimized_network() const;
     sequential<aig_network, true>& get_optimized_network();
+
+    // Keep optimized network during optimization, can only be called after showing the correctness
+    void keep_optimized_network();
+    // reset the optimized network to the last successful optimization
+    void reset_optimized_network_by_last();
+
+    int get_next_target_gate(int target_gate_index, bool is_successful);
 };
 
 

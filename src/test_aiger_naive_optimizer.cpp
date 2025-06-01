@@ -108,6 +108,23 @@ void test_optimize_B_input_not() {
     Logger::info("test_optimize_B_input_not: Dot files written: and_before_B_input_not.dot, and_after_B_input_not.dot");
 }
 
+void test_gate_index() {
+    // Test the gate index retrieval
+    auto aig = create_simple_and_network();
+    auto seq = clone_aig_to_sequential(aig);
+    auto seq2 = seq;
+    auto node_seq = seq.index_to_node(3); // The AND gate is the 3rd node (after 2 PIs)
+    auto node_seq2 = seq2.index_to_node(3);
+    // Logger::info("node_seq index: " + std::to_string(seq.node_to_index(node_seq)));
+    // Logger::info("node_seq2 index: " + std::to_string(seq2.node_to_index(node_seq2)));
+    // Logger::info("node_seq: " + std::to_string(node_seq));
+    // Logger::info("node_seq2: " + std::to_string(node_seq2));
+    assert(seq.node_to_index(node_seq) == seq2.node_to_index(node_seq2));
+    assert(seq.node_to_index(node_seq) == 3); // The AND gate should be at index 3
+    Logger::info("test_gate_index passed");
+}
+
+
 int main() {
     test_optimize_set_zero();
     test_optimize_set_one();
@@ -115,6 +132,7 @@ int main() {
     test_optimize_A_input_not();
     test_optimize_B_input();
     test_optimize_B_input_not();
+    test_gate_index();
     std::cout << "All aiger_naive_optimizer tests passed!\n";
     return 0;
 }

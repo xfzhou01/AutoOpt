@@ -17,7 +17,10 @@ aiger_naive_optimizer::aiger_naive_optimizer(
 
 void aiger_naive_optimizer::optimize(int target_gate, int method)
 {
+    // update the set of gates that is already optimized
+    Logger::info("Optimizing gate " + std::to_string(target_gate) + " using method " + std::to_string(method));
     // Perform optimization based on the method
+
     switch (method) {
         case 0: // Set output to constant 0
             optimize_set_zero(target_gate);
@@ -54,7 +57,7 @@ void aiger_naive_optimizer::optimize_set_zero(int target_gate)
     // substitute the target gate with constant false
     aig.substitute_node(aig.index_to_node(target_gate), aig.get_constant(false));
     // cleanup the network to remove dangling nodes
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     // Print the optimization result
     this->aig_network_during_opt = opt_net; // Update the network after optimization
 }
@@ -68,7 +71,7 @@ void aiger_naive_optimizer::optimize_set_one(int target_gate)
     // substitute the target gate with constant false
     aig.substitute_node(aig.index_to_node(target_gate), aig.get_constant(true));
     // cleanup the network to remove dangling nodes
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     //
     this->aig_network_during_opt = opt_net;
 }
@@ -94,7 +97,7 @@ void aiger_naive_optimizer::optimize_A_input(int target_gate)
     });
     // sub
     aig.substitute_node(node, a_input);
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     this->aig_network_during_opt = opt_net;
 }
 
@@ -119,7 +122,7 @@ void aiger_naive_optimizer::optimize_A_input_not(int target_gate)
     auto not_a_input = aig.create_not(a_input);
     // substitute
     aig.substitute_node(node, not_a_input);
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     this->aig_network_during_opt = opt_net;
 }
 
@@ -144,7 +147,7 @@ void aiger_naive_optimizer::optimize_B_input(int target_gate)
     });
     // sub
     aig.substitute_node(node, b_input);
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     this->aig_network_during_opt = opt_net;
 }
 
@@ -169,7 +172,7 @@ void aiger_naive_optimizer::optimize_B_input_not(int target_gate)
     auto not_b_input = aig.create_not(b_input);
     // substitute
     aig.substitute_node(node, not_b_input);
-    aig = mockturtle::cleanup_dangling(aig);
+    //aig = mockturtle::cleanup_dangling(aig);
     this->aig_network_during_opt = opt_net;
 }
 
@@ -180,4 +183,41 @@ const sequential<aig_network, true>& aiger_naive_optimizer::get_optimized_networ
 
 sequential<aig_network, true>& aiger_naive_optimizer::get_optimized_network() {
     return aig_network_during_opt;
+}
+
+void aiger_naive_optimizer::keep_optimized_network()
+{
+    this->aig_network_after_opt = this->aig_network_during_opt;
+    Logger::info("Optimized AIG network kept after optimization: " 
+                 + std::to_string(aig_network_after_opt.num_pis()) + " PIs, "
+                 + std::to_string(aig_network_after_opt.num_pos()) + " POs, "
+                 + std::to_string(aig_network_after_opt.num_cis()) + " CIs, "
+                 + std::to_string(aig_network_after_opt.num_cos()) + " COs, "
+                 + std::to_string(aig_network_after_opt.num_gates()) + " GATEs.");
+}
+
+void aiger_naive_optimizer::reset_optimized_network_by_last()
+{
+    this->aig_network_during_opt = this->aig_network_after_opt;
+    Logger::info("Optimized AIG network reset to last kept state: " 
+                 + std::to_string(aig_network_during_opt.num_pis()) + " PIs, "
+                 + std::to_string(aig_network_during_opt.num_pos()) + " POs, "
+                 + std::to_string(aig_network_during_opt.num_cis()) + " CIs, "
+                 + std::to_string(aig_network_during_opt.num_cos()) + " COs, "
+                 + std::to_string(aig_network_during_opt.num_gates()) + " GATEs.");
+}
+
+int aiger_naive_optimizer::get_next_target_gate(int target_gate_index, bool is_successful)
+{
+    // TODO: consider clean up dangling
+    // if is successful, means the target_gate is already eliminated,
+    // return the next target gate for optimization
+    if (aig_network_during_opt.num_gates() == 0) {
+        Logger::info("No gates available for optimization.");
+        return -1; // No gates to optimize
+    }
+
+    // Iterate the gates in the network,
+    // the order is in reverse topological order
+    return target_gate_index - 1;
 }
